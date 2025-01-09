@@ -1,11 +1,11 @@
-DROP DATABASE IF EXISTS employees_db;
-CREATE DATABASE employees_db;
+DROP DATABASE IF EXISTS company_db;
+CREATE DATABASE company_db;
 
-\c employees_db;
+\c company_db;
 
 CREATE TABLE department (
     id SERIAL PRIMARY KEY,
-    names VARCHAR(30)
+    names VARCHAR(30) UNIQUE NOT NULL
 ); 
 
 -- ^name needs to be checked\
