@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "inquirer": "^12.3.0",
+    "pg": "^8.13.1"
+  },
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "Provide a short description explaining the what, why, and how of your project. Use the following questions as a guide:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
