@@ -5,12 +5,10 @@ CREATE DATABASE company_db;
 
 CREATE TABLE department (
     id SERIAL PRIMARY KEY,
-    names VARCHAR(30) UNIQUE NOT NULL
+    name VARCHAR(30) UNIQUE NOT NULL
 ); 
 
--- ^name needs to be checked\
-
-CREATE TABLE roles (
+CREATE TABLE role (
     id SERIAL PRIMARY KEY,
     title VARCHAR(30) UNIQUE NOT NULL,
     salary DECIMAL NOT NULL,
@@ -29,4 +27,10 @@ CREATE TABLE employee (
     ON DELETE SET NULL,
     FOREIGN KEY (manager_id) REFERENCES employee(id)
     ON DELETE SET NULL
+);
+
+CREATE TABLE manager (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL
 );

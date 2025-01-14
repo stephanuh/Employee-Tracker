@@ -6,56 +6,79 @@ function mainMenu(): void {
     inquirer
     .prompt([
         {
-            type: 'list',
-            name: 'choice',
-            message: 'Select the following option:',
+            type: "list",
+            name: "choice",
+            message: "Select the following option:",
             choices: [
-                'View all Departments',
+                "View all Departments",
                 'View all Roles',
-                'View all employees',
-                'Add a Department',
-                'Add a Role',
-                'Add an Employee',
-                'Update an Employee Role',
-                'Exit'
+                "View all employees",
+                "Add a Department",
+                "Add a Role",
+                "Add an Employee",
+                "Update an Employee Role",
+                "Exit"
             ],
         },
     ])
     .then((answers) => {
-        if (answers.choice === 'View all Departments'){
-            viewAllDepartments();
+        switch (answers.choice){
+            case "View all Departments":
+                return viewAllDepartments();
+            case "View all Roles":
+                return viewAllRoles();
+            case "View all Employees":
+                return viewAllEmployees();
+            case "Add a Department":
+                return addDepartment();
+            case "Add a Role":
+                return addRole();
+            case "Add an Employee":
+                return addAnEmployee();
+            case "Update an Employee Role":
+                return updateEmployeeRole();
+            case "Exit":
+                pool.end();
+                process.exit();
         }
-        if (answers.choice === 'View all Roles'){
-            viewAllRoles();
-        }
-        if (answers.choice === 'View all Employees'){
-            viewAllEmployees();
-        }
-        if (answers.choice === 'Add a Department'){
-            addDepartment();
-        }
-        if (answers.choice === 'Add a Role'){
-            addRole();
-        }
-        if(answers.choice === 'Add an Employee'){
-            addAnEmployee();
-        }
-        if(answers.choice === 'Update an Employee Role'){
-            updateEmployeeRole();
-        }
-        if(answers.choice === 'Exit'){
-            pool.end();
-            process.exit();
-        }
-    });
+    })
+    // .then((answers) => {
+    //     if (answers.choice === "View all Departments"){
+    //         viewAllDepartments();
+    //     }
+    //     if (answers.choice === "View all Roles"){
+    //         viewAllRoles();
+    //     }
+    //     if (answers.choice === "View all Employees"){
+    //         viewAllEmployees();
+    //     }
+    //     if (answers.choice === "Add a Department"){
+    //         addDepartment();
+    //     }
+    //     if (answers.choice === "Add a Role"){
+    //         addRole();
+    //     }
+    //     if(answers.choice === "Add an Employee"){
+    //         addAnEmployee();
+    //     }
+    //     if(answers.choice === "Update an Employee Role"){
+    //         updateEmployeeRole();
+    //     }
+    //     if(answers.choice === "Exit"){
+    //         pool.end();
+    //         process.exit();
+    //     }
+    // });
 }
+mainMenu();
+
 //TODO: Implement the following functions
 // presented with a formatted table showing department names and department ids
 
-function viewAllDepartments(): void {
-    pool.query('SELECT * FROM DEPARTMENT',(err: Error, result: QueryResult) => {
+async function viewAllDepartments() {
+    pool.query('SELECT * FROM department',(err: Error, result: QueryResult) => {
             if (err){
-                console.error(err); //console.log? or error
+                console.error(err);
             }else if (result){
                 console.table(result.rows);
             }
@@ -66,7 +89,7 @@ function viewAllDepartments(): void {
 //presented with the job title, role id, the department that role belongs to, and the salary for that role
 function viewAllRoles(): void {
     pool.query(`SELECT title, role.id, salary, department.name AS department FROM role
-        JOIN department on role.department_id = department.id`,(err: Error, result: QueryResult) =>{ // JOIN department ON ??
+        JOIN department ON role.department_id = department.id`,(err: Error, result: QueryResult) =>{
             if (err){
                 console.error(err);
             }else if (result){
@@ -78,7 +101,11 @@ function viewAllRoles(): void {
 
 //presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
 function viewAllEmployees(): void {
-    pool.query(`SELECT employee.id, employee.first_name AS "Employee First Name", employee.last_name AS "Employee Last Name", role.title, department.name AS Department, role.salary, CONCAT(manager.first_name,
+    pool.query(`SELECT 
+        employee.id, employee.first_name AS "Employee First Name", 
+        employee.last_name AS "Employee Last Name", role.title, 
+        department.name AS Department, role.salary, 
+        CONCAT(manager.first_name, ' ', manager.last_name) AS Manager
         FROM employee
         INNER JOIN role ON employee.role_id = role.id
         INNER JOIN department ON role.department_id = department.id
@@ -99,17 +126,17 @@ function viewAllEmployees(): void {
 function addDepartment(): void {
     inquirer
     .prompt([{
-        type: 'input',
-        name: 'name',
-        message: 'Enter the name of the department:'
+        type: "input",
+        name: "name",
+        message: "Enter the name of the department:"
     }])
     .then((answers) => {
-        const userInfo = answers.name;//answers.userInfo
-        pool.query(`INSERT INTO department (name) VALUE ($1)`,[userInfo],(err: Error, result: QueryResult) =>{
+        const userInfo = answers.name;
+        pool.query(`INSERT INTO department (name) VALUES ($1)`,[userInfo],(err: Error, result: QueryResult) =>{
             if (err){
                 console.error(err);
             }else if (result){
-                console.log(`Added ${userInfo}to the database.`);
+                console.log(`Added ${userInfo} to the database.`);
             }
             mainMenu();
         })
@@ -121,7 +148,7 @@ function addRole(): void {
         if (err){
             console.error(err);
         }else if(result){
-            const departmentsNames = result.rows.map(row => row.name);
+            const departmentsNames = result.rows.map((row: { name: string }) => row.name);
 
             inquirer
             .prompt([{
@@ -163,10 +190,104 @@ function addRole(): void {
 
 //prompted to enter the employee's first name, last name, role, and manager, and that employee is added to the database
 function addAnEmployee(): void {
-    
+    pool.query(`SELECT DISTINCT title FROM role`,(err: Error, result: QueryResult) =>{
+        if(err){
+            console.error(err);
+        }else if(result){
+            const roleTitles = result.rows.map((row: { title: string }) => row.title);
+
+            pool.query(`SELECT id, 
+                CONCAT (first_name, ' ', last_name) AS "Manager Name" 
+                FROM employee`,
+                 (err: Error, result: QueryResult) =>{
+                if (err){
+                    console.error(err);
+                }else if (result){
+                    const managers = result.rows.map((row: { "Manager Name": string, id: number }) => ({ name: row["Manager Name"], value: row.id}));
+                    managers.unshift({name: 'None', value: null});
+                    inquirer
+                    .prompt([{
+                        type: "input",
+                        name: "firstName",
+                        message: "What is the employee's first name?"
+                    },
+                {
+                    type: "input",
+                    name: "lastName",
+                    message: "What is the employee's last name?"
+                },
+            {
+                type: "list",
+                name: "roleName",
+                message: "What is the employee's role?",
+                choices: roleTitles
+            },
+        {
+            type: "list",
+            name: "managerId",
+            message: "Who is the employee's manager?",
+            choices: managers
+        }
+    ])
+    .then ((answers) =>{
+        const {firstName, lastName, roleName, managerId} = answers;
+        pool.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, (SELECT id FROM role WHERE title = $3), $4)`,
+            [firstName, lastName, roleName, managerId],
+            (err: Error,_result: QueryResult) => {
+                if (err){
+                    console.error(err);
+                }else {
+                    console.log(`Added ${firstName} ${lastName} to the database.`);
+                }
+                mainMenu();
+            })})}})}})
 }
+
 //prompted to select an employee to update and their new role and this information is updated in the database
-function updateEmployeeRole(): void {}
+function updateEmployeeRole(): void {
+    pool.query(`SELECT id, 
+        CONCAT(first_name, ' ', last_name) AS "Employee Name" 
+        From employee`, 
+        (err: Error, result: QueryResult) =>{
+        if (err){
+            console.error(err);
+        }else if (result){
+            const employees = result.rows.map((row: { "Employee Name": string, id: number }) => ({ name: row["Employee Name"], value: row.id}));
+
+            pool.query(`SELECT DISTINCT title FROM role`, (err: Error, result: QueryResult) =>{
+                if (err){
+                    console.error(err);
+                }else if(result){
+                    const roleName = result.rows.map((row: { title: string }) => row.title);
+                    inquirer
+                    .prompt([{
+                        type: "list",
+                        name: "employeeId",
+                        message: "What employee would you like to update?",
+                        choices: employees
+                    },
+                {
+                    type: "list",
+                    name: "roleName",
+                    message: "What is the employee's new role?",
+                    choices: roleName
+                }
+            ])
+            .then((answers) =>{
+                const {employeeId, roleName} = answers;
+                pool.query(`UPDATE employee 
+                    SET role_id = (SELECT id FROM role WHERE title = $1)
+                    WHERE id = $2`,
+                    [roleName, employeeId],
+                    (err: Error, _result: QueryResult) =>{
+                        if (err){
+                            console.error(err);
+                        }else{
+                            console.log(`Updated employee's role.`);
+                        }
+                        mainMenu();
+                    })})}})}})
+}
 
 await connectToDb();
 mainMenu();
