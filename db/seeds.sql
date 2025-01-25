@@ -19,6 +19,6 @@ VALUES
 ('John', 'Doe', 1, NULL),
 ('Jane', 'Doe', 2, 1),
 ('Alice', 'Smith', 3, NULL),
-('Bob', 'Smith', 4, 3),
-('Charlie', 'Brown', 5, 4),
-('David', 'Brown', 6, 5);
+('Bob', 'Smith', 4, 2),
+('Charlie', 'Brown', 5, NULL),
+('David', 'Brown', 6, 3);
