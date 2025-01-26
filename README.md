@@ -23,7 +23,7 @@ The ***Employee Tracker CLI Application*** is a friendly command-line tool that 
 
 ![alt text](image.png)
 
-Use the arrow keys to navigate the menu and select an option. To watch and see a walkthrough video [Click here]()
+Use the arrow keys to navigate the menu and select an option. To watch and see a walkthrough video [Click here](https://drive.google.com/file/d/1sWu6ogGAUJ68fc4tsRt-HOFsZu3C0QGD/view)
 
 
 
