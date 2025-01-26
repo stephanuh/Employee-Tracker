@@ -12,7 +12,7 @@ function mainMenu(): void {
             choices: [
                 "View all Departments",
                 'View all Roles',
-                "View all employees",
+                "View all Employees",
                 "Add a Department",
                 "Add a Role",
                 "Add an Employee",
